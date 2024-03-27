@@ -1,5 +1,4 @@
-import React, { useState } from "react"
-import { useEffect } from "react";
+import React, { useState, useEffect } from "react"
 import styled from "styled-components";
 
 // 이미 스타이릴이 된 element를 만들수 있음. 단점으로는 css가 자동완성이 안됨
