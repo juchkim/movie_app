@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react"
 import instance from "../api/axios";
 import request from "../api/request";
 
+import './Banner.css'
+
+
 const Banner = (props) => {
   const [movie, setMovie] = useState([]);
   useEffect(()=>{
@@ -19,13 +22,42 @@ const Banner = (props) => {
         }
       });
       setMovie(movieDetail);
+      console.log(movieDetail);
     }
   }
 
+  // 글자수가 일정이상 넘어가면 ...으로 붙여주기 위한 함수
+  const truncate = (str, n) => {
+    return str?.length > n ? str.substring(0, n) + '...' : str;
+  }
+
   return (
-    <div>
-      
-    </div>
+    <header
+      className="banner"
+      style={{
+        backgroundImage: `url("https://image.tmdb.org/t/p/original/${movie.backdrop_path}")`,
+        backgroundSize: "cover",
+        backgroundPosition: "top center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      <div className="banner__contents">
+        <h1 className="banner__title">
+           {movie.title || movie.name || movie.orginal_name}
+        </h1>
+        <div className="banner__buttons">
+          {movie?.vidoes?.results[0]?.key &&
+            <button className="banner_button play">Play</button>
+          }
+        </div>
+        <p className="banner__description">
+          {truncate(movie.overview, 100)}
+        </p>
+      </div>
+      <div className="banner--fadeBottom"/>
+
+
+    </header>
   )
 };
 
