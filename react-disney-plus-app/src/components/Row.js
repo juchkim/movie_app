@@ -1,14 +1,22 @@
 import React, { useCallback, useEffect, useState } from "react"
 import instance from "../api/axios";
 import './Row.css';
+import MovieModal from "./MovieModal";
 
 const Row = ({title, id, fetchUrl}) => {
   const [movies, setMovies] = useState([]);
+  const [selectMovie, setSelectMovie] = useState({});
+  const [modalOpen, setModalOpen] = useState(false);
 
   const fetchMovieData = useCallback( async () => {
     let res = await instance.get(fetchUrl)
     setMovies(res.data.results);
   }, [fetchUrl])
+
+  const handleClick = (movie) => {
+    setModalOpen(true);
+    setSelectMovie(movie);
+  }
 
   useEffect(() =>{
     fetchMovieData();
@@ -30,7 +38,8 @@ const Row = ({title, id, fetchUrl}) => {
           {movies.map(movie => (
             <img 
               className="row__poster" 
-              key={movie.id} 
+              key={movie.id}
+              onClick={()=>handleClick(movie)} 
               src={`https://image.tmdb.org/t/p/w500${movie.backdrop_path}`} 
               alt={movie.title} 
             />
@@ -44,6 +53,12 @@ const Row = ({title, id, fetchUrl}) => {
           </span>
         </div>
       </div>
+      {modalOpen && 
+      <MovieModal
+        setModalOpen={setModalOpen}
+        {...selectMovie}
+      />
+      }
       
     </div>
   )
