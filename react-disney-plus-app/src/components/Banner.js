@@ -25,7 +25,6 @@ const Banner = (props) => {
         }
       });
       setMovie(movieDetail);
-      console.log(movieDetail);
     }
   }
 
