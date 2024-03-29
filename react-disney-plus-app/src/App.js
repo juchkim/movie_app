@@ -1,40 +1,34 @@
-import styled from 'styled-components';
-import Nav from './components/Nav';
-import Banner from './components/Banner';
-import Category from './components/Category';
-import Row from './components/Row';
-import request from './api/request';
+
+import { Outlet, Route, Routes } from 'react-router-dom';
 import './App.css'
+import MainPage from './page/MainPage';
+import Nav from './components/Nav';
+import LoginPage from './page/LoginPage';
+import DetailPage from './page/DetailPage';
+import SearchPage from './page/SearchPage';
 
-const Container = styled.div`
-  position: relative;
-  min-height: calc(100vh - 250px);
-  overflow-x: hidden;
-  display: block;
-  top: 72px;
-  padding: 0 calc(3.5vw + 5px);
+const Layout = () => {
+  return(
+    <div>
+      <Nav/>
+      <Outlet/>
+    </div>
+  )
+}
 
-  &::after{
-    background: url("/images/home-background.png") center center / cover no-repeat fixed;
-    content: "";
-    position: absolute;
-    inset: 0px;
-    opcaity : 1;
-    z-index: -1;
-  }
-`
 
 function App() {
   return (
-    <Container>
-      <Nav/>
-      <Banner/>
-      <Category/>
-      <Row title="Tranding Now" id="TN" fetchUrl={request.fetchTrending}/>
-      <Row title="Top Rated" id="TR" fetchUrl={request.fetchTopRated}/>
-      <Row title="Action Movies" id="AM" fetchUrl={request.fetchActionMovies}/>
-      <Row title="Comedy Movies" id="CM" fetchUrl={request.fetchComedynMovies}/>
-    </Container>
+    <div className='app'>
+      <Routes>
+        <Route path='/' element={<Layout />}>
+          <Route index Component={<LoginPage />} />
+          <Route path='/main' element={<MainPage />} />
+          <Route path=':movieId' element={<DetailPage />} />
+          <Route path='search' element={<SearchPage />} />
+        </Route>
+      </Routes>
+    </div>
   );
 }
 
