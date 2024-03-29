@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { useLocation, useNavigate, useNavigation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 // 이미 스타이릴이 된 element를 만들수 있음. 단점으로는 css가 자동완성이 안됨
@@ -94,7 +94,7 @@ const Nav = (props) => {
 
   const handleChange = (e)=>{
     setSearchValue(e.target.value);
-    navigate(`/searcj?q=${e.target.value}`);
+    navigate(`/search?q=${e.target.value}`);
     //검색시 바로 경겨로를 변경함
     //경로가 변경이 되더라도 Nav컴퍼넌트는 모든 페이지에 다 들어있기에 상위는 변경이 없음
     //q파라매타는 useLocation.search로 가져오니, 다른 페이지에서 가져올 수 있음
@@ -113,7 +113,7 @@ const Nav = (props) => {
       {pathname === "/" ? 
       <Login>Login</Login> : 
       <Input 
-      value={setSearchValue}
+      value={searchValue}
       onChange={handleChange}
       className="nav__input"
       type="text" 
