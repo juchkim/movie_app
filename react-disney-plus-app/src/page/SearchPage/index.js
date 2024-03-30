@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom';
 import instance from '../../api/axios';
 import './SearchPage.css'
+import { useDebounce } from '../../hooks/useDebouce';
 
 const SearchPage = () => {
   const { search } = useLocation();
@@ -11,18 +12,22 @@ const SearchPage = () => {
 
   const [searchResults, setSearchResults] = useState([])
   const useQuery = ()=>{
-    const query = new URLSearchParams(search);
-    return query.get("q");
+    return new URLSearchParams(search);
   }
 
   // 쿼리를 가져오는 것은 리랜더링이 될 필요가 없기에 일반 변수로 선언
-  const searchTerm = useQuery();
+  const query = useQuery();
+  const searchTerm = query.get("q");
+  const debouceValue = useDebounce(searchTerm);
+
 
   useEffect(()=>{
-    fetchSerachMovie();
-  }, [searchTerm]);
+    if(debouceValue){
+      fetchSerachMovie(debouceValue);
+    }
+  }, [debouceValue]);
 
-  const fetchSerachMovie = async()=>{
+  const fetchSerachMovie = async(searchTerm)=>{
     try{
       const res = await instance.get(`/search/multi?include_adult=false&query=${searchTerm}`);
       setSearchResults(res.data.results);
