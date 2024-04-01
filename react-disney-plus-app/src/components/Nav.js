@@ -1,3 +1,4 @@
+import { GoogleAuthProvider, getAuth, onAuthStateChanged, signInWithPopup } from "firebase/auth";
 import React, { useState, useEffect } from "react"
 import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -65,6 +66,25 @@ const Nav = (props) => {
   const [show, setShow] = useState(false);
   const { pathname } = useLocation();
   // location.pathname을 가져옴
+  const auth = getAuth();
+  const provider = new GoogleAuthProvider();
+  
+  useEffect(() => {
+    //처음 들어올 시 firebase에서 로그인이 되어있는지 확인함
+    //Nav는 모든 페이지에 있기에 포괄적으로 실행이 됨, 굳이 store에 갈 필요가 없음
+    onAuthStateChanged(auth,(user)=>{
+      console.log(user);
+      if(user){
+        //유저 로그인이 되어있다고, 로그인 path에 있으면 main으로 가게 함
+        if(pathname==="/")
+          navigate('/main');
+      }else{
+        //유저 로그인이 되어있지 않다면 /
+        navigate('/');
+      }
+
+    }); //
+  });
 
   const navigate = useNavigate();
 
@@ -100,6 +120,15 @@ const Nav = (props) => {
     //q파라매타는 useLocation.search로 가져오니, 다른 페이지에서 가져올 수 있음
   }
 
+  const handleAuth = ()=>{
+    signInWithPopup(auth, provider).then(result => {
+      console.log(result);
+    })
+    .catch(error =>{
+      console.error(error);
+    })
+  }
+
   return (
     <NavWrapper show={show}>
       <Logo>
@@ -111,7 +140,7 @@ const Nav = (props) => {
       </Logo>
 
       {pathname === "/" ? 
-      <Login>Login</Login> : 
+      <Login onClick={handleAuth}>Login</Login> : 
       <Input 
       value={searchValue}
       onChange={handleChange}
