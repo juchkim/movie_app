@@ -1,4 +1,4 @@
-import { GoogleAuthProvider, getAuth, onAuthStateChanged, signInWithPopup } from "firebase/auth";
+import { GoogleAuthProvider, getAuth, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
 import React, { useState, useEffect } from "react"
 import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -64,17 +64,23 @@ const Input = styled.input`
 const Nav = (props) => {
   // 스크롤시 네비바의 배경색상을 변경하기 위해서 상태추가함
   const [show, setShow] = useState(false);
+  const initialUserData = localStorage.getItem('userData') ? JSON.parse(localStorage.getItem("userData")) : {};
+  // localStorage에 데이터가 있으면 초기값으로 넣어주고, 없으면 빈값으로 넣어주기
+  const [userData, setUserData] = useState(initialUserData); //firebase로그인후 userData 상태 저장
   const { pathname } = useLocation();
   // location.pathname을 가져옴
   const auth = getAuth();
   const provider = new GoogleAuthProvider();
+
+  const navigate = useNavigate();
   
   useEffect(() => {
     //처음 들어올 시 firebase에서 로그인이 되어있는지 확인함
     //Nav는 모든 페이지에 있기에 포괄적으로 실행이 됨, 굳이 store에 갈 필요가 없음
     onAuthStateChanged(auth,(user)=>{
-      console.log(user);
       if(user){
+        // setUserData(user); 이렇게 일일히 가져올 수 있지만, localStorage에 넣어서 refresh해서 유지 될 수 있게 함
+        // 보안상 localStorage는 약간 위험함.
         //유저 로그인이 되어있다고, 로그인 path에 있으면 main으로 가게 함
         if(pathname==="/")
           navigate('/main');
@@ -84,9 +90,8 @@ const Nav = (props) => {
       }
 
     }); //
-  });
+  },[auth, navigate, pathname]);
 
-  const navigate = useNavigate();
 
   const [searchValue, setSearchValue] = useState("");
 
@@ -122,9 +127,21 @@ const Nav = (props) => {
 
   const handleAuth = ()=>{
     signInWithPopup(auth, provider).then(result => {
-      console.log(result);
+      setUserData(result.user);
+      localStorage.setItem('userData', JSON.stringify(result.user));
+      //localStorage는 텍스트로만 저장이 되어서 JSON.stringify()을 사용하여 넣음
     })
     .catch(error =>{
+      console.error(error);
+    })
+  }
+
+  const handlerSignOut = ()=>{
+    //firebase에서 제공해주는 signOut함수 사용
+    signOut(auth).then(()=>{
+      setUserData({});
+      navigate('/');
+    }).catch(error=>{
       console.error(error);
     })
   }
@@ -141,16 +158,63 @@ const Nav = (props) => {
 
       {pathname === "/" ? 
       <Login onClick={handleAuth}>Login</Login> : 
+      <>
       <Input 
-      value={searchValue}
-      onChange={handleChange}
-      className="nav__input"
-      type="text" 
-      placeholder="검색해주세요."/>}
+        value={searchValue}
+        onChange={handleChange}
+        className="nav__input"
+        type="text" 
+        placeholder="검색해주세요."/>
+        <SignOut>
+          <UserImg src={userData.photoURL} alt={userData.displayName}/>
+          <DropDown>
+            <soan onClick={handlerSignOut}>Sign Out</soan>
+          </DropDown>
+        </SignOut>
+        </>
+        }
       {/* 메인이 로그인 페이지이니 pathname으로 메인이면 로그인 버튼, 그 외는 검색칸으로 나오게 하기 */}
     </NavWrapper>
   )
 };
 
 export default Nav;
+
+const DropDown = styled.div`
+  position: absolute;
+  top: 48px;
+  right: 0px;
+  background: rgb(19, 19, 19)
+  border: 1px solid rgba(151, 151, 151, 0.34);
+  border-radius:  4px;
+  box-shadow: rgb(0 0 0 /50%) 0px 0px 18px 0px;
+  padding: 10px;
+  font-size: 14px;
+  letter-spacing: 3px;
+  width: 100%;
+  opacity: 0;
+`;
+
+const SignOut = styled.div`
+  position: relative;
+  height: 48px;
+  width: 48px;
+  display: flex;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    ${DropDown} {
+      opacity: 1;
+      transition-duration: 1s;
+    }
+  }
+`;
+
+const UserImg = styled.img`
+  border-radius: 50%;
+  width:100%;
+  height:100%;
+`
 
